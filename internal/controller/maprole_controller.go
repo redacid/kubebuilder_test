@@ -18,15 +18,17 @@ package controller
 
 import (
 	"context"
+
 	"github.com/go-logr/logr"
-	prozorrov1alpha1 "github.com/redacid/kubebuilder_test/api/v1alpha1"
-	"github.com/redacid/kubebuilder_test/awsauth"
-	"github.com/redacid/kubebuilder_test/kube"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	prozorrov1alpha1 "github.com/redacid/kubebuilder_test/api/v1alpha1"
+	"github.com/redacid/kubebuilder_test/awsauth"
+	"github.com/redacid/kubebuilder_test/kube"
 )
 
 // MapRoleReconciler reconciles a MapRole object
@@ -50,7 +52,7 @@ type MapRoleReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *MapRoleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	mapRoleName := req.NamespacedName.Name
+	mapRoleName := req.Name
 	_ = logf.FromContext(ctx)
 
 	log := r.Log.WithValues("MapRole", mapRoleName)

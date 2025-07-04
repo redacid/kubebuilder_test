@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -55,7 +56,7 @@ func (r *MapUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	_ = logf.FromContext(ctx)
 
 	// MapUser objects are named by their associated AWS IAM user ARNs.
-	mapUserName := req.NamespacedName.Name
+	mapUserName := req.Name
 	log := r.Log.WithValues("MapUser", mapUserName)
 	log.Info("reconciling MapUser...")
 

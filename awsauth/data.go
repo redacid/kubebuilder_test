@@ -69,7 +69,11 @@ func CreateAuthMap(k kubernetes.Interface) (*kcorev1.ConfigMap, error) {
 			Namespace: ConfigMapNamespace,
 		},
 	}
-	return k.CoreV1().ConfigMaps(ConfigMapNamespace).Create(context.Background(), configMapObject, apismetav1.CreateOptions{})
+	return k.CoreV1().ConfigMaps(ConfigMapNamespace).Create(
+		context.Background(),
+		configMapObject,
+		apismetav1.CreateOptions{},
+	)
 }
 
 // UpdateAuthMap updates a given ConfigMap
@@ -89,7 +93,7 @@ func UpdateAuthMap(k kubernetes.Interface, authData AwsAuthData, cm *kcorev1.Con
 		"mapUsers": string(mapUsers),
 	}
 
-	cm, err = k.CoreV1().ConfigMaps(ConfigMapNamespace).Update(context.Background(), cm, apismetav1.UpdateOptions{})
+	_, err = k.CoreV1().ConfigMaps(ConfigMapNamespace).Update(context.Background(), cm, apismetav1.UpdateOptions{})
 	return err
 }
 

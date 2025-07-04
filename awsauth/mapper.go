@@ -16,9 +16,10 @@ limitations under the License.
 package awsauth
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
+
+	// "io/ioutil"
+	"io"
 	"log"
 	"reflect"
 	"time"
@@ -32,7 +33,7 @@ func NewMapper(client kubernetes.Interface, discardLogOutput bool) *Mapper {
 	mapper.KubernetesClient = client
 
 	if !discardLogOutput {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 	return mapper
 }
@@ -84,7 +85,7 @@ func (m *Mapper) removeAuth(args *Arguments) error {
 	}
 
 	if !removed {
-		return errors.New(fmt.Sprintf("%s with username '%s' not found in auth map", args.DataType, args.Username))
+		return fmt.Errorf("%s with username '%s' not found in auth map", args.DataType, args.Username)
 	}
 	return UpdateAuthMap(m.KubernetesClient, authData, configMap)
 }

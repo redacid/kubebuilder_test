@@ -42,11 +42,7 @@ func WithRetry(fn func(*Arguments) error, args *Arguments) error {
 		}
 	)
 
-	for {
-		if counter >= args.MaxRetryCount {
-			break
-		}
-
+	for counter < args.MaxRetryCount {
 		if err = fn(args); err != nil {
 			d := bkoff.Duration()
 			log.Printf("error: %v: will retry after %v", err, d)
@@ -56,5 +52,6 @@ func WithRetry(fn func(*Arguments) error, args *Arguments) error {
 		}
 		return nil
 	}
+
 	return errors.Wrap(err, "waiter timed out")
 }

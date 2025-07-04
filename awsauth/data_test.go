@@ -46,7 +46,11 @@ func createMockConfigMap(client kubernetes.Interface) {
 			"mapUsers": user.String(),
 		},
 	}
-	_, err := client.CoreV1().ConfigMaps(ConfigMapNamespace).Create(context.Background(), configMap, metav1.CreateOptions{})
+	_, err := client.CoreV1().ConfigMaps(ConfigMapNamespace).Create(
+		context.Background(),
+		configMap,
+		metav1.CreateOptions{},
+	)
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
 }
@@ -73,12 +77,13 @@ func TestUpdateAuthMap(t *testing.T) {
 	err = UpdateAuthMap(client, auth, cm)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	auth, cm, err = ReadAuthMap(client)
+	// auth, cm, err = ReadAuthMap(client)
+	auth, _, err = ReadAuthMap(client)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	fmt.Println(auth.MapRoles[0])
-	g.Expect(len(auth.MapRoles)).To(gomega.Equal(2))
-	g.Expect(len(auth.MapUsers)).To(gomega.Equal(2))
+	g.Expect(auth.MapRoles).To(gomega.HaveLen(2))
+	g.Expect(auth.MapUsers).To(gomega.HaveLen(2))
 }
 
 func TestReadAuthMap(t *testing.T) {
@@ -89,12 +94,12 @@ func TestReadAuthMap(t *testing.T) {
 
 	auth, _, err := ReadAuthMap(client)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(len(auth.MapRoles)).To(gomega.Equal(1))
+	g.Expect(auth.MapRoles).To(gomega.HaveLen(1))
 	g.Expect(auth.MapRoles[0].RoleARN).To(gomega.Equal("arn:aws:iam::00000000000:role/node-1"))
 	g.Expect(auth.MapRoles[0].Username).To(gomega.Equal("system:node:{{EC2PrivateDNSName}}"))
 	g.Expect(auth.MapRoles[0].Groups).To(gomega.Equal([]string{"system:bootstrappers", "system:nodes"}))
 
-	g.Expect(len(auth.MapUsers)).To(gomega.Equal(1))
+	g.Expect(auth.MapUsers).To(gomega.HaveLen(1))
 	g.Expect(auth.MapUsers[0].UserARN).To(gomega.Equal("arn:aws:iam::00000000000:user/user-1"))
 	g.Expect(auth.MapUsers[0].Username).To(gomega.Equal("admin"))
 	g.Expect(auth.MapUsers[0].Groups).To(gomega.Equal([]string{"system:masters"}))
@@ -107,6 +112,6 @@ func TestNewAuthMap(t *testing.T) {
 
 	auth, _, err := ReadAuthMap(client)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(len(auth.MapRoles)).To(gomega.Equal(0))
-	g.Expect(len(auth.MapUsers)).To(gomega.Equal(0))
+	g.Expect(auth.MapRoles).To(gomega.BeEmpty())
+	g.Expect(auth.MapUsers).To(gomega.BeEmpty())
 }

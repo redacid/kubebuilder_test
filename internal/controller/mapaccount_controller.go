@@ -20,8 +20,8 @@ import (
 	"context"
 
 	prozorrov1alpha1 "github.com/redacid/kubebuilder_test/api/v1alpha1"
-	//"github.com/redacid/kubebuilder_test/awsauth"
-	//"github.com/redacid/kubebuilder_test/kube"
+	// "github.com/redacid/kubebuilder_test/awsauth"
+	// "github.com/redacid/kubebuilder_test/kube"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
