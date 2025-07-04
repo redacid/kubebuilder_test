@@ -1,0 +1,9 @@
+apiVersion: prozorro.sr.ios.in.ua/v1alpha1
+kind: MapRole
+metadata:
+  labels:
+    app.kubernetes.io/name: redacid-test
+    app.kubernetes.io/managed-by: kustomize
+  name: maprole-sample
+spec:
+  # TODO(user): Add fields here

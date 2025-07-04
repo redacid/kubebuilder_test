@@ -1,0 +1,6 @@
+## Append samples of your project ##
+resources:
+- prozorro_v1alpha1_maprole.yaml
+- prozorro_v1alpha1_mapuser.yaml
+- prozorro_v1alpha1_mapaccount.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples
