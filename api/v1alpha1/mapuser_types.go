@@ -28,8 +28,20 @@ type MapUserSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of MapUser. Edit mapuser_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// The User ARN to associate with the MapUser
+	UserARN string `json:"userarn"`
+
+	// The Kubernetes groups to associate with the MapUser
+	// +kubebuilder:validation:Optional
+	Groups []string `json:"groups"`
+
+	// A useful description of the MapUser
+	// +kubebuilder:validation:Optional
+	Description string `json:"description"`
+
+	// The email address of a contact person for the MapUser
+	// +kubebuilder:validation:Optional
+	Username string `json:"username"`
 }
 
 // MapUserStatus defines the observed state of MapUser.

@@ -28,8 +28,20 @@ type MapRoleSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of MapRole. Edit maprole_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// The Role ARN to associate with the MapRole
+	RoleARN string `json:"rolearn"`
+
+	// The Kubernetes groups to associate with the MapRole
+	// +kubebuilder:validation:Optional
+	Groups []string `json:"groups"`
+
+	// A useful description of the MapRole
+	// +kubebuilder:validation:Optional
+	Description string `json:"description"`
+
+	// The email address of a contact person for the MapUser
+	// +kubebuilder:validation:Optional
+	Username string `json:"username"`
 }
 
 // MapRoleStatus defines the observed state of MapRole.

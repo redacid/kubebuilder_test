@@ -18,12 +18,14 @@ package controller
 
 import (
 	"context"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/go-logr/logr"
 	prozorrov1alpha1 "github.com/redacid/kubebuilder_test/api/v1alpha1"
 	"github.com/redacid/kubebuilder_test/awsauth"
 	"github.com/redacid/kubebuilder_test/kube"
@@ -32,6 +34,7 @@ import (
 // MapUserReconciler reconciles a MapUser object
 type MapUserReconciler struct {
 	client.Client
+	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
@@ -51,7 +54,54 @@ type MapUserReconciler struct {
 func (r *MapUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = logf.FromContext(ctx)
 
-	// TODO(user): your logic here
+	// MapUser objects are named by their associated AWS IAM user ARNs.
+	mapUserName := req.NamespacedName.Name
+	log := r.Log.WithValues("MapUser", mapUserName)
+	log.Info("reconciling MapUser...")
+
+	kubeClient, err := kube.GetClient()
+	if err != nil {
+		log.Error(err, "failure getting kube client")
+		return ctrl.Result{}, err
+	}
+
+	// Get a new aws auth service object.
+	awsauthSvc, err := awsauth.NewService(&awsauth.ServiceConfig{
+		KubeClient: kubeClient,
+		Log:        r.Log,
+	})
+	if err != nil {
+		log.Error(err, "failure creating new aws auth service")
+		return ctrl.Result{}, err
+	}
+
+	// Load the MapUser object by name (its AWS IAM user ARN).
+	var mapUser prozorrov1alpha1.MapUser
+	if err := r.Get(ctx, req.NamespacedName, &mapUser); err != nil {
+		// If any error other than a "NotFound" API error, it's a problem.
+		statusErr, ok := err.(*apierrors.StatusError)
+		if !ok || (ok && statusErr.ErrStatus.Reason != "NotFound") {
+			log.Error(err, "failure getting MapUser")
+			return ctrl.Result{}, err
+		}
+
+		if err := awsauthSvc.RemoveMapUser(mapUserName); err != nil {
+			log.Error(err, "failure removing mapUser data in aws-auth configmap")
+			return ctrl.Result{}, nil
+		}
+		log.Info("removed mapUser data in aws-auth configmap")
+		return ctrl.Result{}, nil
+	}
+
+	// Ensure that any changes are synced to the kube-system:aws-auth ConfigMap.
+	if err := awsauthSvc.UpsertMapUser(mapUser.Name, awsauth.MapUser{
+		UserARN: mapUser.Spec.UserARN,
+		Groups:  mapUser.Spec.Groups,
+	}); err != nil {
+		log.Error(err, "failure upserting MapUser")
+		return ctrl.Result{}, err
+	}
+	log.Info("upserted MapUser")
 
 	return ctrl.Result{}, nil
 }

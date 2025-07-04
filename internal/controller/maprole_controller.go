@@ -18,10 +18,11 @@ package controller
 
 import (
 	"context"
-
+	"github.com/go-logr/logr"
 	prozorrov1alpha1 "github.com/redacid/kubebuilder_test/api/v1alpha1"
 	"github.com/redacid/kubebuilder_test/awsauth"
 	"github.com/redacid/kubebuilder_test/kube"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -31,6 +32,7 @@ import (
 // MapRoleReconciler reconciles a MapRole object
 type MapRoleReconciler struct {
 	client.Client
+	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
@@ -48,9 +50,55 @@ type MapRoleReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *MapRoleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	mapRoleName := req.NamespacedName.Name
 	_ = logf.FromContext(ctx)
 
-	// TODO(user): your logic here
+	log := r.Log.WithValues("MapRole", mapRoleName)
+	log.Info("reconciling MapRole...")
+
+	kubeClient, err := kube.GetClient()
+	if err != nil {
+		log.Error(err, "failure getting kube client")
+		return ctrl.Result{}, err
+	}
+
+	// Get a new aws auth service object.
+	awsauthSvc, err := awsauth.NewService(&awsauth.ServiceConfig{
+		KubeClient: kubeClient,
+		Log:        r.Log,
+	})
+	if err != nil {
+		log.Error(err, "failure creating new aws auth service")
+		return ctrl.Result{}, err
+	}
+
+	// Load the MapRole object by name (its AWS IAM role ARN).
+	var mapRole prozorrov1alpha1.MapRole
+	if err := r.Get(ctx, req.NamespacedName, &mapRole); err != nil {
+		// If any error other than a "NotFound" API error, it's a problem.
+		statusErr, ok := err.(*apierrors.StatusError)
+		if !ok || (ok && statusErr.ErrStatus.Reason != "NotFound") {
+			log.Error(err, "failure getting MapRole")
+			return ctrl.Result{}, err
+		}
+
+		if err := awsauthSvc.RemoveMapRole(mapRoleName); err != nil {
+			log.Error(err, "error removing mapRole data in aws-auth configmap")
+			return ctrl.Result{}, nil
+		}
+		log.Info("removed mapRole data in aws-auth configmap")
+		return ctrl.Result{}, nil
+	}
+
+	// Ensure that any changes are synced to the kube-system:aws-auth ConfigMap.
+	if err := awsauthSvc.UpsertMapRole(mapRole.Name, awsauth.MapRole{
+		RoleARN: mapRole.Spec.RoleARN,
+		Groups:  mapRole.Spec.Groups,
+	}); err != nil {
+		log.Error(err, "error upserting MapRole in aws-auth")
+		return ctrl.Result{}, err
+	}
+	log.Info("upserted MapRole")
 
 	return ctrl.Result{}, nil
 }
