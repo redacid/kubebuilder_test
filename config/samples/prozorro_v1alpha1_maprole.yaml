@@ -4,11 +4,11 @@ metadata:
   labels:
     app.kubernetes.io/name: redacid-test
     app.kubernetes.io/managed-by: kustomize
-  name: maprole-sample1
+  name: system:node:{{EC2PrivateDNSName}}
 spec:
-  rolearn: arn:aws:iam::123456789012:role/sample-maprole2
+  rolearn: arn:aws:iam::130488995195:role/prod-self-managed-node-group
   groups:
     - sample:group1
     - sample:group2
   description: A sample maprole
-  username: test.user@ios.in.ua
+  username: test1.user@ios.in.ua

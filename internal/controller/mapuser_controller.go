@@ -56,6 +56,7 @@ func (r *MapUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	_ = logf.FromContext(ctx)
 
 	// MapUser objects are named by their associated AWS IAM user ARNs.
+	// mapUserName := req.Name
 	mapUserName := req.Name
 	log := r.Log.WithValues("MapUser", mapUserName)
 	log.Info("reconciling MapUser...")
@@ -96,8 +97,9 @@ func (r *MapUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// Ensure that any changes are synced to the kube-system:aws-auth ConfigMap.
 	if err := awsauthSvc.UpsertMapUser(mapUser.Name, awsauth.MapUser{
-		UserARN: mapUser.Spec.UserARN,
-		Groups:  mapUser.Spec.Groups,
+		Username: mapUser.Spec.Username,
+		UserARN:  mapUser.Spec.UserARN,
+		Groups:   mapUser.Spec.Groups,
 	}); err != nil {
 		log.Error(err, "failure upserting MapUser")
 		return ctrl.Result{}, err
