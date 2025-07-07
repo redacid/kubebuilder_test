@@ -5,10 +5,11 @@
 replicaCount: 2
 
 image:
-  repository: ghcr.io/redacid/kubebuilder_test
+  #repository: ghcr.io/redacid/kubebuilder_test
+  repository: redacid/aws-auth-controller
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.0.4"
+  tag: "0.0.8"
 
 imagePullSecrets: []
 nameOverride: ""

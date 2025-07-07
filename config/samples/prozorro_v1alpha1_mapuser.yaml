@@ -7,4 +7,4 @@ spec:
   username: test1.user@ios.in.ua
   groups:
     - test:group
-  userarn: arn:aws:iam::123456789012:user/sample-mapuser1
+  userarn: arn:aws:iam::123456789012:user/sample-mapuser1-1

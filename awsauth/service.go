@@ -106,6 +106,7 @@ func (svc impl) UpsertMapUser(username string, mapUser MapUser) error {
 		DataType: MapUserData,
 		UserARN:  mapUser.UserARN,
 		// Username:      username,
+		CrdName:       username,
 		Username:      mapUser.Username,
 		Groups:        mapUser.Groups,
 		WithRetries:   svc.cfg.WithRetries,
@@ -124,8 +125,8 @@ func (svc impl) RemoveMapUser(username string) error {
 	mapper := NewMapper(svc.cfg.KubeClient, false)
 	err := mapper.Remove(&Arguments{
 		DataType: MapUserData,
-		Username: username,
-		// Username:      mapUser.Username,
+		//Username: username,
+		CrdName:       username,
 		WithRetries:   svc.cfg.WithRetries,
 		MaxRetryCount: svc.cfg.MaxRetryCount,
 		MaxRetryTime:  svc.cfg.MaxRetryTime,

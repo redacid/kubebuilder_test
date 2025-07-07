@@ -10,3 +10,5 @@ git push origin 0.0.4
 cd ./charts helm upgrade -i --namespace kube-system aws-auth aws-auth-operator
 cd ./config/samples kubectl apply -f prozorro_v1alpha1_mapuser.yaml -n kube-system
 cd ./config/samples kubectl apply -f prozorro_v1alpha1_maprole.yaml -n kube-system
+
+https://book.kubebuilder.io/reference/using-finalizers

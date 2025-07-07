@@ -75,7 +75,7 @@ func (m *Mapper) removeAuth(args *Arguments) error {
 	if args.DataType == MapUserData {
 		var newUsersAuthMap []*MapUser
 		for _, mapUser := range authData.MapUsers {
-			if args.Username != mapUser.Username {
+			if args.CrdName != mapUser.CrdName {
 				newUsersAuthMap = append(newUsersAuthMap, mapUser)
 			} else {
 				removed = true
@@ -85,7 +85,7 @@ func (m *Mapper) removeAuth(args *Arguments) error {
 	}
 
 	if !removed {
-		return fmt.Errorf("%s with username '%s' not found in auth map", args.DataType, args.Username)
+		return fmt.Errorf("%s with username '%s' not found in auth map", args.DataType, args.CrdName)
 	}
 	return UpdateAuthMap(m.KubernetesClient, authData, configMap)
 }
@@ -117,7 +117,7 @@ func (m *Mapper) upsertAuth(args *Arguments) error {
 	}
 
 	if args.DataType == MapUserData {
-		mapUser := NewMapUser(args.UserARN, args.Username, args.Groups)
+		mapUser := NewMapUser(args.CrdName, args.UserARN, args.Username, args.Groups)
 		newMap, ok := upsertUser(authData.MapUsers, mapUser)
 		if ok {
 			log.Printf("%s with username '%s' key has been updated\n", args.DataType, args.Username)
@@ -159,10 +159,29 @@ func upsertUser(authMaps []*MapUser, resource *MapUser) ([]*MapUser, bool) {
 	var found, updated bool
 	for _, existing := range authMaps {
 		// Update existing user in auth map.
-		if existing.UserARN == resource.UserARN {
+		//if existing.UserARN == resource.UserARN {
+		//	found = true
+		//	if !reflect.DeepEqual(existing.Groups, resource.Groups) {
+		//		existing.SetGroups(resource.Groups)
+		//		updated = true
+		//	}
+		//	if existing.Username != resource.Username {
+		//		existing.SetUsername(resource.Username)
+		//		updated = true
+		//	}
+		//	if existing.UserARN != resource.UserARN {
+		//		existing.SetUserARN(resource.UserARN)
+		//		updated = true
+		//	}
+		//}
+		if existing.CrdName == resource.CrdName {
 			found = true
 			if !reflect.DeepEqual(existing.Groups, resource.Groups) {
 				existing.SetGroups(resource.Groups)
+				updated = true
+			}
+			if existing.Username != resource.Username {
+				existing.SetUsername(resource.Username)
 				updated = true
 			}
 			if existing.UserARN != resource.UserARN {
@@ -186,6 +205,7 @@ type Arguments struct {
 	DataType      DataType
 	RoleARN       string
 	UserARN       string
+	CrdName       string
 	Username      string
 	Groups        []string
 	WithRetries   bool

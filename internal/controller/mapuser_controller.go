@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/go-logr/logr"
+	// "github.com/go-logr/logr"
 	prozorrov1alpha1 "github.com/redacid/kubebuilder_test/api/v1alpha1"
 	"github.com/redacid/kubebuilder_test/awsauth"
 	"github.com/redacid/kubebuilder_test/kube"
@@ -35,7 +35,7 @@ import (
 // MapUserReconciler reconciles a MapUser object
 type MapUserReconciler struct {
 	client.Client
-	Log    logr.Logger
+	// Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
@@ -58,8 +58,9 @@ func (r *MapUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// MapUser objects are named by their associated AWS IAM user ARNs.
 	// mapUserName := req.Name
 	mapUserName := req.Name
-	log := r.Log.WithValues("MapUser", mapUserName)
-	log.Info("reconciling MapUser...")
+	log := ctrl.Log.WithValues("MapUser", mapUserName)
+	//log := r. Log.WithValues("MapUser", mapUserName)
+	log.Info("")
 
 	kubeClient, err := kube.GetClient()
 	if err != nil {
@@ -70,7 +71,8 @@ func (r *MapUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	// Get a new aws auth service object.
 	awsauthSvc, err := awsauth.NewService(&awsauth.ServiceConfig{
 		KubeClient: kubeClient,
-		Log:        r.Log,
+		//Log:        r.Log,
+		Log: ctrl.Log,
 	})
 	if err != nil {
 		log.Error(err, "failure creating new aws auth service")
@@ -79,11 +81,12 @@ func (r *MapUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// Load the MapUser object by name (its AWS IAM user ARN).
 	var mapUser prozorrov1alpha1.MapUser
+
 	if err := r.Get(ctx, req.NamespacedName, &mapUser); err != nil {
 		// If any error other than a "NotFound" API error, it's a problem.
 		statusErr, ok := err.(*apierrors.StatusError)
 		if !ok || (ok && statusErr.ErrStatus.Reason != "NotFound") {
-			log.Error(err, "failure getting MapUser")
+			logf.Log.Error(err, "failure getting MapUser")
 			return ctrl.Result{}, err
 		}
 
@@ -97,6 +100,7 @@ func (r *MapUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// Ensure that any changes are synced to the kube-system:aws-auth ConfigMap.
 	if err := awsauthSvc.UpsertMapUser(mapUser.Name, awsauth.MapUser{
+		CrdName:  mapUser.Name,
 		Username: mapUser.Spec.Username,
 		UserARN:  mapUser.Spec.UserARN,
 		Groups:   mapUser.Spec.Groups,
