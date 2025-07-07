@@ -1,9 +1,10 @@
 apiVersion: prozorro.sr.ios.in.ua/v1alpha1
 kind: MapUser
 metadata:
-  labels:
-    app.kubernetes.io/name: redacid-test
-    app.kubernetes.io/managed-by: kustomize
-  name: mapuser-sample
+  name: test
 spec:
-  # TODO(user): Add fields here
+  description: A test mapuser
+  username: test.user@ios.in.ua
+  groups:
+    - test:group
+  userarn: arn:aws:iam::123456789012:user/sample-mapuser
