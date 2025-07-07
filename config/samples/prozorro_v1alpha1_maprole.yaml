@@ -4,9 +4,9 @@ metadata:
   labels:
     app.kubernetes.io/name: redacid-test
     app.kubernetes.io/managed-by: kustomize
-  name: maprole-sample
+  name: maprole-sample1
 spec:
-  rolearn: arn:aws:iam::123456789012:role/sample-maprole
+  rolearn: arn:aws:iam::123456789012:role/sample-maprole2
   groups:
     - sample:group1
     - sample:group2
