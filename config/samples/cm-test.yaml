@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+  uid: fdd88534-708a-45ad-9518-45cf3be96afe
+  resourceVersion: '77445'
+  creationTimestamp: '2025-07-07T15:02:39Z'
+  selfLink: /api/v1/namespaces/kube-system/configmaps/aws-auth
+spec: {}
+data:
+  mapRoles: |
+    []
+  mapUsers: |
+    - crdname: test1
+      userarn: arn:aws:iam::123456789012:user/sample-mapuser1-1
+      username: test1.user@ios.in.ua
+      groups:
+      - test:group
+    - crdname: node-user
+      userarn: arn:aws:iam::130488995195:role/prod-self-managed-node-group
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+      - system:bootstrappers
+      - system:nodes
+    - crdname: node-user-spaced
+      userarn: asasas asasasas dfdfdfd dfdfdfdf
+      username: asasas asasasas
+      groups:
+      - system:bootstrappers
+      - system:nodes

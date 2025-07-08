@@ -1,0 +1,11 @@
+apiVersion: prozorro.sr.ios.in.ua/v1alpha1
+kind: MapUser
+metadata:
+  name: node-user-spaced
+spec:
+  description: Node User
+  username: asasas asasasas
+  groups:
+    - system:bootstrappers
+    - system:nodes
+  userarn: asasas asasasas dfdfdfd dfdfdfdf
